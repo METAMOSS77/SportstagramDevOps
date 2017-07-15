@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": ":) ",
   "scripts": {
+    "test": "jest",
     "build:webpack": "NODE_ENV=production webpack --config webpack.config.prod.js",
     "build": "npm run clean && npm run build:webpack",
     "test": "NODE_ENV=production mocha './tests/**/*.spec.js' --compilers js:babel-core/register",
@@ -53,7 +54,11 @@
     "stylus-loader": "^2.0.0",
     "webpack": "^1.13.0",
     "webpack-dev-middleware": "^1.6.1",
-    "webpack-hot-middleware": "^2.10.0"
+    "webpack-hot-middleware": "^2.10.0",
+    "jest": " __ TESTING __",
+    "jest": "^20.0.0",
+    "enzyme": "^2.9.1",
+    "react-addons-test-utils": "^15.5.1"
   },
   "devDependencies": {
     "expect": "^1.18.0",
