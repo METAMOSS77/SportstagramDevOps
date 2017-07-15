@@ -3,9 +3,9 @@
  */
 import { shallow } from 'enzyme'
 import React from 'react'
-import App from '../index.html';
+import Information from '../client/components/Information.js';
 describe('Index.js page', () => {
     it('has a "<div>" tag', () => {
-        const wrapper = shallow(<App />);
-        expect(wrapper.find('<div>').length).toBe(1)    })
+        const wrapper = shallow(<Information />);
+        expect(wrapper.find('p').length).toBe(1)    })
 })
