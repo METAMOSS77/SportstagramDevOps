@@ -1,0 +1,392 @@
+import React from 'react';
+import Photo from './Photo';
+import PhotoProfil from './PhotoProfil';
+
+const Profil = React.createClass({
+ handleUpload(e){
+        e.preventDefault();
+        //console.log('Submit form !!!');
+        const fileupload = this.refs.fileupload;
+        const caption = this.refs.caption.value;
+        console.log("caption = " + caption);
+        console.log("filepuplad = " + fileupload);
+        /*var payload = {
+            username: username,
+            password: password
+        };
+        this.props.login('http://localhost:3000/user?pseudo=' + username + '&password=' + password);*/
+        this.refs.loginForm.reset();
+    },
+    componentWillMount(){
+        this.props.login("http://localhost:3000/getPicturesProfil?idUser=1");
+    },
+    render(){
+
+        if (this.props.isLoading) {
+            return <p>Loading…</p>;
+        }
+
+        if (this.props.items.Message == 'Success') {
+            return (
+                <section>
+
+                <div>
+                <h1>Profil</h1>
+                <div className="single-photo">
+                    <form action="http://localhost:3000/fileupload" method="post" encType="multipart/form-data">
+                        <input type="file" ref="fileupload" name="filetoupload"/>
+                        <input type="text" ref="caption" name="caption"/>
+                        <input type="submit"/>
+                    </form>
+                </div>
+            </div>
+
+            <div className="photo-grid">
+                    {this.props.items.Pictures.map((post, i) =>
+                        <PhotoProfil {...this.props} key={i} i={i} post={post}/>)}
+                </div>
+
+                </section>
+            )
+        }
+
+        return (
+            <div>
+                <h1>Profil</h1>
+                <div className="single-photo">
+                    <form action="http://localhost:3000/fileupload" method="post" encType="multipart/form-data">
+                        <input type="file" name="filetoupload"/>
+                        <input type="text" name="caption"/>
+                        <input type="submit"/>
+                    </form>
+                </div>
+            </div>
+        )
+
+    }
+});
+
+export default Profil;
+
+
+// photolike
+
+import React from 'react';
+import {Link} from 'react-router';
+import CSSTransitionGroup from 'react-addons-css-transition-group';
+
+const PhotoLike = React.createClass({
+
+    handleLike: function(e) {
+      //console.log(this.props.i);
+      console.log(this.props.items.suggestions[this.props.i].id);
+      console.log(JSON.parse(localStorage["session"])[0].id);
+      //this.props.incrementLikeSuggestion(this.props.i);
+      this.props.incrementSuggestionLike(
+          'http://localhost:3000/likePicture',
+          this.props.i,
+          JSON.parse(localStorage["session"])[0].id,
+          this.props.items.suggestions[this.props.i].id
+          );
+    },
+
+    handleFollow: function(e) {
+        var currentUserId = JSON.parse(localStorage["session"])[0].id;
+        var imageUserId = this.props.post.user_id;
+         this.props.addFollow(
+          'http://localhost:3000/follow',
+          currentUserId,
+          imageUserId
+          );
+
+         console.log("current user id = " + JSON.parse(localStorage["session"])[0].id);
+         console.log("photo user id = " + this.props.post.user_id);
+    },
+
+    getIndex: function(value, arr, prop) {
+        for(var i = 0; i < arr.length; i++) {
+            if(arr[i][prop] === value) {
+                return i;
+            }
+        }
+        return -1; //to handle the case where the value doesn't exist
+    },
+
+    render(){
+        const {post, i, comments} = this.props;
+
+         if(this.getIndex(post.id, this.props.items.LikedPictures, "id_image") === -1) {
+                 return (
+            <figure className="grid-figure">
+                <div className="grid-photo-wrap">
+                    <Link to={`/view/${post.code}`}>
+                        <img src={require('./../'+post.path) } alt={post.caption} className="grid-photo"/>
+                    </Link>
+
+                    <CSSTransitionGroup transitionName="like" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
+                        <span key={post.nb_like} className="likes-heart">{post.nb_like}</span>
+                    </CSSTransitionGroup>
+
+                </div>
+
+                <figcaption>
+                    <p>{post.caption}</p>
+                    <p>{post.tag_1} {post.tag_2} {post.tag_3}</p>
+                    <div className="control-buttons">
+                        <button onClick={(e) => this.handleLike(e)} /*onClick={() => this.props.incrementLikeSuggestion(i)}*/ value={i} className="likes">
+                            &hearts; {post.nb_like}
+                        </button>
+                        <button onClick={(e) => this.handleFollow(e)} value={i} className="likes">
+                            follow
+                        </button>
+                        <Link to={`/view/${post.code}`} className="button">
+                            <span className="comment-count">
+                            <span className="speech-bubble"></span>
+                                  {(comments[post.code] ? comments[post.code].length : 0)}
+                            </span>
+                        </Link>
+                        
+                    </div>
+                </figcaption>
+            </figure>
+        )           
+         } else {
+               return (
+            <figure className="grid-figure">
+                <div className="grid-photo-wrap">
+                    <Link to={`/view/${post.code}`}>
+                        <img src={require('./../'+post.path) } alt={post.caption} className="grid-photo"/>
+                    </Link>
+                    <CSSTransitionGroup transitionName="like" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
+                        <span key={post.nb_like} className="likes-heart">{post.nb_like}</span>
+                    </CSSTransitionGroup>
+
+                </div>
+
+                <figcaption>
+                    <p>{post.caption}</p>
+                    <p>{post.tag_1} {post.tag_2} {post.tag_3}</p>
+                    <div className="control-buttons">
+                         <button onClick={(e) => this.handleFollow(e)} value={i} className="likes">
+                            follow
+                        </button>
+                        <Link to={`/view/${post.code}`} className="button">
+                            <span className="comment-count">
+                            <span className="speech-bubble"></span>
+                                  {(comments[post.code] ? comments[post.code].length : 0)}
+                            </span>
+                        </Link>
+                        
+                    </div>
+                </figcaption>
+            </figure>
+        )           
+         }
+
+       
+    }
+});
+
+export default PhotoLike;
+
+
+
+
+
+
+// photolike with multi if else 
+import React from 'react';
+import {Link} from 'react-router';
+import CSSTransitionGroup from 'react-addons-css-transition-group';
+
+const PhotoLike = React.createClass({
+
+    handleLike: function(e) {
+      //console.log(this.props.i);
+      console.log(this.props.items.suggestions[this.props.i].id);
+      console.log(JSON.parse(localStorage["session"])[0].id);
+      //this.props.incrementLikeSuggestion(this.props.i);
+      this.props.incrementSuggestionLike(
+          'http://localhost:3000/likePicture',
+          this.props.i,
+          JSON.parse(localStorage["session"])[0].id,
+          this.props.items.suggestions[this.props.i].id
+          );
+    },
+
+    handleFollow: function(e) {
+        var currentUserId = JSON.parse(localStorage["session"])[0].id;
+        var imageUserId = this.props.post.user_id;
+         this.props.addFollow(
+          'http://localhost:3000/follow',
+          currentUserId,
+          imageUserId
+          );
+
+         console.log("current user id = " + JSON.parse(localStorage["session"])[0].id);
+         console.log("photo user id = " + this.props.post.user_id);
+    },
+
+    getIndex: function(value, arr, prop) {
+        for(var i = 0; i < arr.length; i++) {
+            if(arr[i][prop] === value) {
+                return i;
+            }
+        }
+        return -1; //to handle the case where the value doesn't exist
+    },
+
+    render(){
+        const {post, i, comments} = this.props;
+
+        //console.log("userfollowed = " + JSON.parse(this.props.items.UserFollowed));
+
+         if(this.getIndex(post.id, this.props.items.LikedPictures, "id_image") === -1 && this.getIndex(post.user_id, this.props.items.UserFollowed, "id") === -1) {
+                 return (
+            <figure className="grid-figure">
+                <div className="grid-photo-wrap">
+                    <Link to={`/view/${post.code}`}>
+                        <img src={require('./../'+post.path) } alt={post.caption} className="grid-photo"/>
+                    </Link>
+
+                    <CSSTransitionGroup transitionName="like" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
+                        <span key={post.nb_like} className="likes-heart">{post.nb_like}</span>
+                    </CSSTransitionGroup>
+
+                </div>
+
+                <figcaption>
+                    <p>{post.caption}</p>
+                    <p>{post.tag_1} {post.tag_2} {post.tag_3}</p>
+                    <div className="control-buttons">
+                        <button onClick={(e) => this.handleLike(e)} /*onClick={() => this.props.incrementLikeSuggestion(i)}*/ value={i} className="likes">
+                            &hearts; {post.nb_like}
+                        </button>
+                        <button onClick={(e) => this.handleFollow(e)} value={i} className="likes">
+                            follow
+                        </button>
+                        <Link to={`/view/${post.code}`} className="button">
+                            <span className="comment-count">
+                            <span className="speech-bubble"></span>
+                                  {(comments[post.code] ? comments[post.code].length : 0)}
+                            </span>
+                        </Link>
+                        
+                    </div>
+                </figcaption>
+            </figure>
+        )  
+         }
+
+          if(this.getIndex(post.id, this.props.items.LikedPictures, "id_image") === -1 && !(this.getIndex(post.user_id, this.props.items.UserFollowed, "id") === -1)) {
+                 return (
+            <figure className="grid-figure">
+                <div className="grid-photo-wrap">
+                    <Link to={`/view/${post.code}`}>
+                        <img src={require('./../'+post.path) } alt={post.caption} className="grid-photo"/>
+                    </Link>
+
+                    <CSSTransitionGroup transitionName="like" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
+                        <span key={post.nb_like} className="likes-heart">{post.nb_like}</span>
+                    </CSSTransitionGroup>
+
+                </div>
+
+                <figcaption>
+                    <p>{post.caption}</p>
+                    <p>{post.tag_1} {post.tag_2} {post.tag_3}</p>
+                    <div className="control-buttons">
+                        <button onClick={(e) => this.handleLike(e)} /*onClick={() => this.props.incrementLikeSuggestion(i)}*/ value={i} className="likes">
+                            &hearts; {post.nb_like}
+                        </button>
+                        <Link to={`/view/${post.code}`} className="button">
+                            <span className="comment-count">
+                            <span className="speech-bubble"></span>
+                                  {(comments[post.code] ? comments[post.code].length : 0)}
+                            </span>
+                        </Link>
+                        
+                    </div>
+                </figcaption>
+            </figure>
+        )  
+         }
+
+             if(!this.getIndex(post.id, this.props.items.LikedPictures, "id_image") === -1 && this.getIndex(post.user_id, this.props.items.UserFollowed, "id") === -1) {
+                 return (
+            <figure className="grid-figure">
+                <div className="grid-photo-wrap">
+                    <Link to={`/view/${post.code}`}>
+                        <img src={require('./../'+post.path) } alt={post.caption} className="grid-photo"/>
+                    </Link>
+
+                    <CSSTransitionGroup transitionName="like" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
+                        <span key={post.nb_like} className="likes-heart">{post.nb_like}</span>
+                    </CSSTransitionGroup>
+
+                </div>
+
+                <figcaption>
+                    <p>{post.caption}</p>
+                    <p>{post.tag_1} {post.tag_2} {post.tag_3}</p>
+                    <div className="control-buttons">
+                        <button /*onClick={() => this.props.incrementLikeSuggestion(i)}*/ value={i} className="likes">
+                            &hearts; {post.nb_like}
+                        </button>
+                        <button onClick={(e) => this.handleFollow(e)} value={i} className="likes">
+                            follow
+                        </button>
+                        <Link to={`/view/${post.code}`} className="button">
+                            <span className="comment-count">
+                            <span className="speech-bubble"></span>
+                                  {(comments[post.code] ? comments[post.code].length : 0)}
+                            </span>
+                        </Link>
+                        
+                    </div>
+                </figcaption>
+            </figure>
+        )  
+         }
+
+         if(!this.getIndex(post.id, this.props.items.LikedPictures, "id_image") === -1 && !this.getIndex(post.user_id, this.props.items.UserFollowed, "id") === -1) {
+         return (
+            <figure className="grid-figure">
+                <div className="grid-photo-wrap">
+                    <Link to={`/view/${post.code}`}>
+                        <img src={require('./../'+post.path) } alt={post.caption} className="grid-photo"/>
+                    </Link>
+
+                    <CSSTransitionGroup transitionName="like" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
+                        <span key={post.nb_like} className="likes-heart">{post.nb_like}</span>
+                    </CSSTransitionGroup>
+
+                </div>
+
+                <figcaption>
+                    <p>{post.caption}</p>
+                    <p>{post.tag_1} {post.tag_2} {post.tag_3}</p>
+                    <div className="control-buttons">
+                        <button onClick={(e) => this.handleLike(e)} /*onClick={() => this.props.incrementLikeSuggestion(i)}*/ value={i} className="likes">
+                            &hearts; {post.nb_like}
+                        </button>
+                        <button onClick={(e) => this.handleFollow(e)} value={i} className="likes">
+                            follow
+                        </button>
+                        <Link to={`/view/${post.code}`} className="button">
+                            <span className="comment-count">
+                            <span className="speech-bubble"></span>
+                                  {(comments[post.code] ? comments[post.code].length : 0)}
+                            </span>
+                        </Link>
+                        
+                    </div>
+                </figcaption>
+            </figure>
+        )  
+         }
+
+    }
+});
+
+export default PhotoLike;

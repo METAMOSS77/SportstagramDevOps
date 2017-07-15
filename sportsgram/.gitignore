@@ -1,0 +1,5 @@
+backend/node_modules/
+frontend/client/public/images/
+frontend/node_modules/
+images_save/
+npm-debug.log

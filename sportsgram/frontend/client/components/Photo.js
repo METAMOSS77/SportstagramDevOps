@@ -1,0 +1,41 @@
+import React from 'react';
+import {Link} from 'react-router';
+import CSSTransitionGroup from 'react-addons-css-transition-group';
+
+class Photo extends React.Component{
+    render(){
+        const {post, i, comments} = this.props;
+        return (
+            <figure className="grid-figure">
+                <div className="grid-photo-wrap">
+                    <Link to={`/view/${post.code}`}>
+                        <img src={require('./../'+post.path) } alt={post.caption} className="grid-photo"/>
+                    </Link>
+
+                    <CSSTransitionGroup transitionName="like" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
+                        <span key={post.nb_like} className="likes-heart">{post.nb_like}</span>
+                    </CSSTransitionGroup>
+
+                </div>
+
+                <figcaption>
+                    <p>{post.caption}</p>
+                    <p>{post.tag_1} {post.tag_2} {post.tag_3}</p>
+                    <div className="control-buttons">
+                        <button onClick={() => this.props.increment(i)} className="likes">
+                            &hearts; {post.nb_like}
+                        </button>
+                        <Link to={`/view/${post.code}`} className="button">
+                            <span className="comment-count">
+                            <span className="speech-bubble"></span>
+                                  {(comments[post.code] ? comments[post.code].length : 0)}
+                            </span>
+                        </Link>
+                    </div>
+                </figcaption>
+            </figure>
+        )
+    }
+}
+
+export default Photo;
