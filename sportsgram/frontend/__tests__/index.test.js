@@ -3,7 +3,7 @@
  */
 import { shallow } from 'enzyme'
 import React from 'react'
-import Information from '..//client/components/Information.js';
+import Information from '../client/components/Information.js';
 describe('Index.js page', () => {
     it('has a "<div>" tag', () => {
         const wrapper = shallow(<Information />);
